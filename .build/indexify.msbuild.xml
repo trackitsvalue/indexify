@@ -21,6 +21,7 @@
     -->
     <DefineAppVersion BuildNumber="$(BUILD_NUMBER)" MainlineVersion="$(CURRENT_MAINLINE_VERSION)" GitBranch="$(GIT_BRANCH)" Verbose="$(VERBOSE)" >
       <Output TaskParameter="ApplicationVersion" PropertyName="ApplicationVersion" />
+      <Output TaskParameter="ShortApplicationVersion" PropertyName="ShortApplicationVersion" />
     </DefineAppVersion>
     <!--<Exec Command="CopyLibs_Release.bat &quot;$(BASE_REPO_HOME)&quot;" WorkingDirectory="$(SolutionDirectory)" />-->
     <SetVersionInfoFile SolutionType="cs" SolutionDirectory="$(SolutionDirectory)" AssemblySubdirectory="tiv.elastic" Company="$(COMPANY)" ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" Verbose="$(VERBOSE)" />
@@ -47,7 +48,7 @@
     
     <!-- Public tiv.elastic to nuget for wider consumption -->
     <Exec Command="nuget pack tiv.elastic.csproj -Prop Configuration=Release" WorkingDirectory="$(SolutionDirectory)\tiv.elastic" />
-    <Exec Command="nuget push tiv.elastic.$(ApplicationVersion).nupkg -Source https://api.nuget.org/v3/index.json" WorkingDirectory="$(SolutionDirectory)\tiv.elastic" />
+    <Exec Command="nuget push tiv.elastic.$(ShortApplicationVersion).nupkg -Source https://api.nuget.org/v3/index.json" WorkingDirectory="$(SolutionDirectory)\tiv.elastic" />
   
     <OnError ExecuteTargets="InformUsersOnError" />
   </Target>
