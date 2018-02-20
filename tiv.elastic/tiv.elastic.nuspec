@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>freebyTech</authors>
+    <owners>freebyTech</owners>
+    <licenseUrl>https://github.com/trackitsvalue/indexify/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/trackitsvalue/indexify</projectUrl>
+    <iconUrl>https://www.trackitsvalue.com/Content/img/XSmallLogo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <summary></summary>
+    <tags>ELK elastic REST API</tags>
+    <releaseNotes />
+    <copyright>Copyright 2018</copyright>
+    <language />
+    <dependencies>
+      <dependency id="RestSharp" version="106.1.0" />
+    </dependencies>
+  </metadata>
+</package>
