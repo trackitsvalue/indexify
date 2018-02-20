@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "indexify", "indexify\indexi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tiv.elastic", "tiv.elastic\tiv.elastic.csproj", "{B64A0849-448E-4DD3-A8B2-3AEABE5CED79}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{F13619F4-F23C-41A4-97B4-6C63645DFFBB}"
+	ProjectSection(SolutionItems) = preProject
+		.build\indexify.msbuild.xml = .build\indexify.msbuild.xml
+		.build\tiv.elastic.nuspec = .build\tiv.elastic.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

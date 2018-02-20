@@ -12,7 +12,7 @@
     <CallTarget Targets="MsgAppBuildStart" />
     <CallTarget Targets="ShowGitInfo" />
     
-	<Exec Command="nuget.exe restore &quot;$(SolutionFile)&quot;" WorkingDirectory="$(SolutionDirectory)\.build" />
+	  <Exec Command="nuget.exe restore &quot;$(SolutionFile)&quot;" WorkingDirectory="$(SolutionDirectory)\.build" />
     <!-- 
       MAJOR.MINOR VERSION OVERRIDE NOTE: 
       
@@ -45,6 +45,9 @@
     
     <PushToRepository ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Release" SourceDirectoryOrFile="$(SolutionDirectory)\indexify\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
     
+    <!-- Public tiv.elastic to nuget for wider consumption -->
+    <Exec Command="nuget.exe pack tiv.elastic.nuspec" />  
+  
     <OnError ExecuteTargets="InformUsersOnError" />
   </Target>
   
