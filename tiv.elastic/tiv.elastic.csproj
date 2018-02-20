@@ -71,6 +71,7 @@
     <Compile Include="APIs\_cat\CatAPI.cs" />
     <Compile Include="APIs\_cat\Models\CatResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="tiv.elastic.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

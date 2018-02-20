@@ -46,7 +46,7 @@
     <PushToRepository ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Release" SourceDirectoryOrFile="$(SolutionDirectory)\indexify\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
     
     <!-- Public tiv.elastic to nuget for wider consumption -->
-    <Exec Command="nuget.exe pack tiv.elastic.nuspec" />  
+    <Exec Command="nuget pack tiv.elastic.csproj -Prop Configuration=Release" WorkingDirectory="$(SolutionDirectory)\tiv.elastic" />  
   
     <OnError ExecuteTargets="InformUsersOnError" />
   </Target>

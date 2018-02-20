@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("reindexify")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("indexify")]
+[assembly: AssemblyDescription("This command line tool will reindex a single or series of source Elastic indexes based on the passed index pattern into a destination index.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("reindexify")]
+[assembly: AssemblyCompany("freebyTech")]
+[assembly: AssemblyProduct("indexify")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
