@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using tiv.elastic.GeneralModels;
+using tiv.elasticClient.GeneralModels;
 
-namespace tiv.elastic.APIs._bulk.Models
+namespace tiv.elasticClient.APIs._bulk.Models
 {
     public class BulkResponse
     {

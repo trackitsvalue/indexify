@@ -1,4 +1,4 @@
-﻿namespace tiv.elastic.APIs._search.Interfaces
+﻿namespace tiv.elasticClient.APIs._search.Interfaces
 {
     /// <summary>
     /// This interface represents abstractly components that can make up specific query DSL language. It needs to be dynamic

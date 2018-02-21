@@ -60,9 +60,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\tiv.elastic\tiv.elastic.csproj">
+    <ProjectReference Include="..\tiv.elastic\tiv.elasticClient.csproj">
       <Project>{b64a0849-448e-4dd3-a8b2-3aeabe5ced79}</Project>
-      <Name>tiv.elastic</Name>
+      <Name>tiv.elasticClient</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

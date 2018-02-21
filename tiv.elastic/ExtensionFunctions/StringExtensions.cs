@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace tiv.elastic.ExtensionFunctions
+namespace tiv.elasticClient.ExtensionFunctions
 {
     public static class StringExtensions
     {

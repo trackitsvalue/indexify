@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using RestSharp;
-using tiv.elastic.APIs._cat.Models;
-using tiv.elastic.Exceptions;
-using tiv.elastic.ExtensionFunctions;
+using tiv.elasticClient.APIs._cat.Models;
+using tiv.elasticClient.Exceptions;
+using tiv.elasticClient.ExtensionFunctions;
 
-namespace tiv.elastic.APIs._cat
+namespace tiv.elasticClient.APIs._cat
 {
     public class CatAPI
     {
@@ -26,7 +26,7 @@ namespace tiv.elastic.APIs._cat
             var response = client.Execute<List<CatResponse>>(request);
 
             if (response.IsSuccessful) return response.Data;
-            throw new RESTCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
+            throw new RestCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
         } 
     }
 }

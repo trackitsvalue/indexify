@@ -7,8 +7,8 @@
     <ProjectGuid>{B64A0849-448E-4DD3-A8B2-3AEABE5CED79}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>tiv.elastic</RootNamespace>
-    <AssemblyName>tiv.elastic</AssemblyName>
+    <RootNamespace>tiv.elasticClient</RootNamespace>
+    <AssemblyName>tiv.elasticClient</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -29,7 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\tiv.elastic.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\tiv.elasticClient.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="RestSharp, Version=106.1.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
@@ -58,20 +58,20 @@
     <Compile Include="APIs\_search\Models\SearchAndScrollResponse.cs" />
     <Compile Include="APIs\_search\Models\SearchResponse.cs" />
     <Compile Include="APIs\_search\SearchAndScrollAPI.cs" />
-    <Compile Include="Exceptions\RESTCallException.cs" />
+    <Compile Include="Exceptions\RestCallException.cs" />
     <Compile Include="ExtensionFunctions\StringExtensions.cs" />
     <Compile Include="APIs\_reindex\Models\ReindexRequest.cs" />
     <Compile Include="APIs\_reindex\Models\ReindexResponse.cs" />
     <Compile Include="APIs\_reindex\ReindexAPI.cs" />
     <Compile Include="GeneralModels\ShardInfo.cs" />
-    <Compile Include="RESTClientUtility.cs" />
+    <Compile Include="RestClientUtility.cs" />
     <Compile Include="Serializers\PocoJsonSerializationStrategy.cs" />
     <None Include="README.md" />
     <None Include="Serializers\JsonSerializer.cs" />
     <Compile Include="APIs\_cat\CatAPI.cs" />
     <Compile Include="APIs\_cat\Models\CatResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="tiv.elastic.nuspec" />
+    <None Include="tiv.elasticClient.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

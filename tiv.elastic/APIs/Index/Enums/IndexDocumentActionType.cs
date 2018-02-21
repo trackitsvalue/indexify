@@ -1,4 +1,4 @@
-﻿namespace tiv.elastic.APIs.Index.Enums
+﻿namespace tiv.elasticClient.APIs.Index.Enums
 {
     public class IndexDocumentActionType
     {

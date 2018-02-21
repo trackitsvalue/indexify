@@ -1,8 +1,8 @@
 ﻿using RestSharp;
-using tiv.elastic.APIs.Index.Models;
-using tiv.elastic.Exceptions;
+using tiv.elasticClient.APIs.Index.Models;
+using tiv.elasticClient.Exceptions;
 
-namespace tiv.elastic.APIs.Index
+namespace tiv.elasticClient.APIs.Index
 {
     public class IndexAPI
     {
@@ -16,7 +16,7 @@ namespace tiv.elastic.APIs.Index
             var response = client.Execute<DeleteIndexResponse>(request);
 
             if (response.IsSuccessful) return response.Data;
-            throw new RESTCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
+            throw new RestCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
         }
     }
 }

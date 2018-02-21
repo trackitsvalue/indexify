@@ -2,7 +2,7 @@
 using System.Linq;
 using SimpleJson;
 
-namespace tiv.elastic.Serializers
+namespace tiv.elasticClient.Serializers
 {
     public class IgnoreNullValuesJsonSerializerStrategy : PocoJsonSerializerStrategy
     {

@@ -1,4 +1,4 @@
-﻿namespace tiv.elastic.APIs.Index.Models
+﻿namespace tiv.elasticClient.APIs.Index.Models
 {
     public class DeleteIndexResponse
     {

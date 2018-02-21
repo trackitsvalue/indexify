@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Text;
-using tiv.elastic.APIs.Index.Enums;
-using tiv.elastic.ExtensionFunctions;
+using tiv.elasticClient.APIs.Index.Enums;
+using tiv.elasticClient.ExtensionFunctions;
 
-namespace tiv.elastic.APIs._bulk.ExtensionMethods
+namespace tiv.elasticClient.APIs._bulk.ExtensionMethods
 {
     public static class BulkHelper
     {

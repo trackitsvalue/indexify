@@ -1,11 +1,11 @@
 ﻿using RestSharp;
 using RestSharp.Authenticators;
 
-namespace tiv.elastic
+namespace tiv.elasticClient
 {
-    public class RESTClientUtility
+    public class RestClientUtility
     {
-        public static RESTClientUtility Instance { get; } = new RESTClientUtility();
+        public static RestClientUtility Instance { get; } = new RestClientUtility();
 
         public IRestClient NewClient(string url, IAuthenticator auth)
         {

@@ -1,6 +1,6 @@
 ﻿using RestSharp.Deserializers;
 
-namespace tiv.elastic.APIs._cat.Models
+namespace tiv.elasticClient.APIs._cat.Models
 {
     public class CatResponse
     {

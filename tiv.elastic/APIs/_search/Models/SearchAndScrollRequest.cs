@@ -1,6 +1,6 @@
-﻿using tiv.elastic.APIs._search.Interfaces;
+﻿using tiv.elasticClient.APIs._search.Interfaces;
 
-namespace tiv.elastic.APIs._search.Models
+namespace tiv.elasticClient.APIs._search.Models
 {
     public class SearchAndScrollRequest : IRequestBodySearch
     {

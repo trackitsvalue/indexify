@@ -1,4 +1,4 @@
-﻿namespace tiv.elastic.APIs._search.Models
+﻿namespace tiv.elasticClient.APIs._search.Models
 {
     public class ScrollRequest
     {

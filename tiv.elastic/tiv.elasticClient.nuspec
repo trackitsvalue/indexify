@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/trackitsvalue/indexify</projectUrl>
     <iconUrl>https://www.trackitsvalue.com/Content/img/XSmallLogo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
+    <description>trackItsValue Elastic REST API Client Library</description>
     <summary></summary>
     <tags>ELK elastic REST API</tags>
     <releaseNotes />

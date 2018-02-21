@@ -1,4 +1,4 @@
-﻿namespace tiv.elastic.GeneralModels
+﻿namespace tiv.elasticClient.GeneralModels
 {
     public class ShardInfo
     {

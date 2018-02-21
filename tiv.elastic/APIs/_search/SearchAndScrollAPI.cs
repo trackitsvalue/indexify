@@ -1,9 +1,9 @@
 ﻿using RestSharp;
-using tiv.elastic.APIs._search.Interfaces;
-using tiv.elastic.APIs._search.Models;
-using tiv.elastic.Exceptions;
+using tiv.elasticClient.APIs._search.Interfaces;
+using tiv.elasticClient.APIs._search.Models;
+using tiv.elasticClient.Exceptions;
 
-namespace tiv.elastic.APIs._search
+namespace tiv.elasticClient.APIs._search
 {
     /// <summary>
     /// More information about this API can be found in Elastic's documenation at:
@@ -36,7 +36,7 @@ namespace tiv.elastic.APIs._search
             var response = client.Execute<SearchAndScrollResponse>(request);
 
             if (response.IsSuccessful) return response.Data;
-            throw new RESTCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
+            throw new RestCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace tiv.elastic.APIs._search
             var response = client.Execute<SearchAndScrollResponse>(request);
 
             if (response.IsSuccessful) return response.Data;
-            throw new RESTCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
+            throw new RestCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
         }
     }
 }

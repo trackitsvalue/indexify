@@ -1,8 +1,8 @@
 ﻿using RestSharp;
-using tiv.elastic.APIs._bulk.Models;
-using tiv.elastic.Exceptions;
+using tiv.elasticClient.APIs._bulk.Models;
+using tiv.elasticClient.Exceptions;
 
-namespace tiv.elastic.APIs._bulk
+namespace tiv.elasticClient.APIs._bulk
 {
     /// <summary>
     /// More information about this API can be found in Elastic's documenation at:
@@ -34,7 +34,7 @@ namespace tiv.elastic.APIs._bulk
             var response = client.Execute<BulkResponse>(request);
 
             if (response.IsSuccessful) return response.Data;
-            throw new RESTCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
+            throw new RestCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
         }
     }
 }

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <SolutionDirectory>$(WORKSPACE)</SolutionDirectory>
     <SolutionFile>$(SolutionDirectory)\indexify.sln</SolutionFile>
-    <ApplicationName>tiv.elastic</ApplicationName>
+    <ApplicationName>tiv.elasticClient</ApplicationName>
     <ApplicationName2>Indexify</ApplicationName2>
     <IncludeBinariesInSourceZip>false</IncludeBinariesInSourceZip>
     <MainlineVersionOverride>16.0</MainlineVersionOverride>
@@ -24,7 +24,7 @@
       <Output TaskParameter="ShortApplicationVersion" PropertyName="ShortApplicationVersion" />
     </DefineAppVersion>
     <!--<Exec Command="CopyLibs_Release.bat &quot;$(BASE_REPO_HOME)&quot;" WorkingDirectory="$(SolutionDirectory)" />-->
-    <SetVersionInfoFile SolutionType="cs" SolutionDirectory="$(SolutionDirectory)" AssemblySubdirectory="tiv.elastic" Company="$(COMPANY)" ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" Verbose="$(VERBOSE)" />
+    <SetVersionInfoFile SolutionType="cs" SolutionDirectory="$(SolutionDirectory)" AssemblySubdirectory="tiv.elasticClient" Company="$(COMPANY)" ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" Verbose="$(VERBOSE)" />
     
     <SetVersionInfoFile SolutionType="cs" SolutionDirectory="$(SolutionDirectory)" AssemblySubdirectory="indexify" Company="$(COMPANY)" ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" Verbose="$(VERBOSE)" />
 
@@ -33,7 +33,7 @@
     <!--<NUnit Assemblies="$(SolutionDirectory)\Tests\bin\Debug\NLog.Targets.NetworkJSON.Tests.dll" ToolPath="$(NUNIT_HOME)" />-->
     
 	  <!-- Push applications -->
-	  <PushToRepository ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Debug" SourceDirectoryOrFile="$(SolutionDirectory)\tiv.elastic\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
+	  <PushToRepository ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Debug" SourceDirectoryOrFile="$(SolutionDirectory)\tiv.elasticClient\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
     
     <PushToRepository ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Debug" SourceDirectoryOrFile="$(SolutionDirectory)\indexify\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)">
       <Output TaskParameter="RepositoryInfo" ItemName="RepositoryInfo" />
@@ -42,13 +42,13 @@
     <!-- Build Release version and publish to the repository. --> 
     <MSBuild Projects="$(SolutionFile)" Properties="Configuration=Release;Platform=Any CPU" Targets="Clean;Build" />
   
-    <PushToRepository ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Release" SourceDirectoryOrFile="$(SolutionDirectory)\tiv.elastic\bin\Release" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
+    <PushToRepository ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Release" SourceDirectoryOrFile="$(SolutionDirectory)\tiv.elasticClient\bin\Release" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
     
     <PushToRepository ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Release" SourceDirectoryOrFile="$(SolutionDirectory)\indexify\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
     
-    <!-- Public tiv.elastic to nuget for wider consumption -->
-    <Exec Command="nuget pack tiv.elastic.csproj -Prop Configuration=Release" WorkingDirectory="$(SolutionDirectory)\tiv.elastic" />
-    <Exec Command="nuget push tiv.elastic.$(ShortApplicationVersion).nupkg -Source https://api.nuget.org/v3/index.json" WorkingDirectory="$(SolutionDirectory)\tiv.elastic" />
+    <!-- Public tiv.elasticClient to nuget for wider consumption -->
+    <Exec Command="nuget pack tiv.elasticClient.csproj -Prop Configuration=Release" WorkingDirectory="$(SolutionDirectory)\tiv.elasticClient" />
+    <Exec Command="nuget push tiv.elasticClient.$(ShortApplicationVersion).nupkg -Source https://api.nuget.org/v3/index.json" WorkingDirectory="$(SolutionDirectory)\tiv.elasticClient" />
   
     <OnError ExecuteTargets="InformUsersOnError" />
   </Target>

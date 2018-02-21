@@ -1,4 +1,4 @@
-﻿namespace tiv.elastic.APIs._search.Interfaces
+﻿namespace tiv.elasticClient.APIs._search.Interfaces
 {
     /// <summary>
     /// Interface that represents

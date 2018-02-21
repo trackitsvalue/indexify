@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using tiv.elastic.GeneralModels;
+using tiv.elasticClient.GeneralModels;
 
-namespace tiv.elastic.APIs._search.Models
+namespace tiv.elasticClient.APIs._search.Models
 {
     public class SearchResponse
     {

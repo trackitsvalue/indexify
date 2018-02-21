@@ -1,8 +1,8 @@
 ﻿using RestSharp;
-using tiv.elastic.APIs._reindex.Models;
-using tiv.elastic.Exceptions;
+using tiv.elasticClient.APIs._reindex.Models;
+using tiv.elasticClient.Exceptions;
 
-namespace tiv.elastic.APIs._reindex
+namespace tiv.elasticClient.APIs._reindex
 {
     public class ReindexAPI
     {
@@ -19,7 +19,7 @@ namespace tiv.elastic.APIs._reindex
             var response = client.Execute<ReindexResponse>(request);
 
             if (response.IsSuccessful) return response.Data;
-            throw new RESTCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
+            throw new RestCallException(response.StatusCode, response.StatusDescription, response.ErrorMessage, response.ErrorException);
         } 
     }
 }

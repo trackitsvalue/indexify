@@ -1,4 +1,4 @@
-﻿namespace tiv.elastic.APIs._reindex.Models
+﻿namespace tiv.elasticClient.APIs._reindex.Models
 {
     public class ReindexResponse
     {
