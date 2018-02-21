@@ -1,13 +1,19 @@
 # tiv.elasticClient
 This is the Elastic RESTful API Client Library used by indexify. It can be used seperately in your own projects and is available on nuget as https://www.nuget.org/packages/tiv.elasticClient/.
 
-
 # indexify
 
 This command line tool will reindex a single or series of source Elastic indexes based on the passed index pattern into a destination index.
 
 ***INDEXIFY "url" "/src=index-pattern" "/dest=index" | /dest-is-src-minus=NUMBER | /dest-is-src-plus=STRING | /no-dest-delete-source
             [/ba=USERNAME:PASSWORD] [/v] [/olf=ouput-logfile] [/copyonly] [/dryrun] [/scrollcount=NUMBER]***
+            
+As an example, the command line below would communicate with a localhost Elastic instance and would rewrite every daily index starting with the *tiv-* namespace from December of 2017 and write it into 1 monthly index for December, it would do so by scrolling through the documents 2500 at a time and would log success and failure to a log file:
+
+```
+indexify http://localhost:9200 "/src=tiv-*-2017.12.*" /dest-is-src-minus=3 /lf=C:\indexify\indexify-{0:yyyy-MM-dd_hh-mm-ss}.log /scrollcount=2500 /v
+```
+
 
 | Parameter                  | Description                                            |
 |----------------------------|--------------------------------------------------------|
