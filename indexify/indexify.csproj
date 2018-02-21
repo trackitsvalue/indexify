@@ -60,7 +60,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\tiv.elastic\tiv.elasticClient.csproj">
+    <ProjectReference Include="..\tiv.elasticClient\tiv.elasticClient.csproj">
       <Project>{b64a0849-448e-4dd3-a8b2-3aeabe5ced79}</Project>
       <Name>tiv.elasticClient</Name>
     </ProjectReference>
