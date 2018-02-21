@@ -1,3 +1,7 @@
+# tiv.elasticClient
+This is the Elastic RESTful API Client Library used by indexify. It can be used seperately in your own projects and is available on nuget as https://www.nuget.org/packages/tiv.elasticClient/.
+
+
 # indexify
 
 This command line tool will reindex a single or series of source Elastic indexes based on the passed index pattern into a destination index.
