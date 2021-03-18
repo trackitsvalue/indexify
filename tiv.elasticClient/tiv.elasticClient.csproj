@@ -32,6 +32,9 @@
     <DocumentationFile>bin\Release\tiv.elasticClient.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="RestSharp, Version=106.1.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
       <HintPath>..\packages\RestSharp.106.1.0\lib\net452\RestSharp.dll</HintPath>
       <Private>True</Private>
@@ -43,10 +46,12 @@
   <ItemGroup>
     <Compile Include="APIs\Index\Enums\IndexDocumentActionType.cs" />
     <Compile Include="APIs\Index\IndexAPI.cs" />
-    <Compile Include="APIs\Index\Models\DeleteIndexResponse.cs" />
+    <Compile Include="APIs\Index\Models\IndexResponse.cs" />
     <Compile Include="APIs\_bulk\ExtensionMethods\BulkExtensionMethods.cs" />
     <Compile Include="APIs\_bulk\BulkAPI.cs" />
     <Compile Include="APIs\_bulk\Models\BulkResponse.cs" />
+    <Compile Include="APIs\_settings\SettingsAPI.cs" />
+    <Compile Include="APIs\_mapping\MappingAPI.cs" />
     <Compile Include="APIs\_search\Interfaces\IQueryDSL.cs" />
     <Compile Include="APIs\_search\Interfaces\IRequestBodySearch.cs" />
     <Compile Include="APIs\_search\Models\QueryDLS\components\QueryBlankParam.cs" />
@@ -58,6 +63,7 @@
     <Compile Include="APIs\_search\Models\SearchAndScrollResponse.cs" />
     <Compile Include="APIs\_search\Models\SearchResponse.cs" />
     <Compile Include="APIs\_search\SearchAndScrollAPI.cs" />
+    <Compile Include="APIs\_settings\Models\SettingsResponse.cs" />
     <Compile Include="Exceptions\RestCallException.cs" />
     <Compile Include="ExtensionFunctions\StringExtensions.cs" />
     <Compile Include="APIs\_reindex\Models\ReindexRequest.cs" />
