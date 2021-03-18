@@ -38,6 +38,14 @@ namespace indexify.Models
 
         public FileInfo LogFile { get; private set; }
 
+        public bool CopySourceIndexMappingsAndSettings { get; private set; }
+
+        public int Shards { get; private set; } = -1;
+
+        public int Replicas { get; private set; } = -1;
+
+        public int MaxParallelism { get; private set; } = 1;
+
         private List<string> __helpInfo;
         public List<string> HelpInfo
         {
@@ -50,7 +58,8 @@ namespace indexify.Models
                         @"Will reindex a single or series of source indexes based on the passed index pattern into a destination index.",
                         @"",
                         @"INDEXIFY ""url"" ""/src=index-pattern"" ""/dest=index"" | /dest-is-src-minus=NUMBER | /dest-is-src-plus=STRING | /no-dest-delete-source",
-                        @"            [/ba=USERNAME:PASSWORD] [/v] [/olf=ouput-logfile] [/copyonly] [/dryrun] [/scrollcount=NUMBER]",
+                        @"            [/ba=USERNAME:PASSWORD] [/v] [/olf=ouput-logfile] [/copyonly] [/scrollcount=NUMBER] [/copy-src-mappings-settings]",
+                        @"            [/shards=NUMBER] [/replicas=NUMBER] [/max-parallelism=NUMBER] [/dryrun]",
                         @"",
                         @"  ""url""                           The full url to find the elastic instance at, i.e.:",
                         @"                                  https://servername.domain.com:9200",
@@ -92,6 +101,17 @@ namespace indexify.Models
                         @"                                  This is a better option if the document counts are causing timeout exceptions during reindex",
                         @"                                  operations.",
                         @"                                  NOTE: Not relevant when option is /no-dest-delete-source.",
+                        @"",
+                        @"  /copy-src-mappings-settings     If specified, the destination index will be created explictly with the source index",
+                        @"                                  mappings and settings.",
+                        @"",
+                        @"  /shards=NUMBER                  If specified, the destination index will be created with NUMBER shards.",
+                        @"                                  If not specified the desination index will be created on the source index.",
+                        @"",
+                        @"  /replicas=NUMBER                If specified, the destination index will be created with NUMBER replicas.",
+                        @"                                  If not specified the desination index will be created on the source index.",
+                        @"",
+                        @"  /max-parallelism=NUMBER         If specified, the process will run in parallel with a max degree of parallelism equal to NUMBER.",
                         @"",
                         @"  /dryrun                         If specified, this will be a dry run only and no changes will be made.",
                     };
@@ -234,6 +254,42 @@ namespace indexify.Models
             {
                 DestIsSource = true;
                 SourcePlusString = commandLineEntry.Substring(18);
+                return;
+            }
+
+            if (commandLineEntry.CompareNoCase("/copy-src-mappings-settings"))
+            {
+                CopySourceIndexMappingsAndSettings = true;
+                return;
+            }
+
+            if (commandLineEntry.ToLower().StartsWith("/shards="))
+            {
+                int value;
+                if (int.TryParse(commandLineEntry.Substring(8), out value) && value > 0)
+                {
+                    Shards = value;
+                }
+                return;
+            }
+
+            if (commandLineEntry.ToLower().StartsWith("/replicas="))
+            {
+                int value;
+                if (int.TryParse(commandLineEntry.Substring(10), out value) && value > -1)
+                {
+                    Replicas = value;
+                }
+                return;
+            }
+
+            if (commandLineEntry.ToLower().StartsWith("/max-parallelism="))
+            {
+                int value;
+                if (int.TryParse(commandLineEntry.Substring(17), out value) && value > 1)
+                {
+                    MaxParallelism = value;
+                }
                 return;
             }
 

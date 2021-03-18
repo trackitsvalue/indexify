@@ -19,6 +19,10 @@ using tiv.elasticClient.APIs._search.Models;
 using tiv.elasticClient.APIs._search.Models.QueryDLS;
 using tiv.elasticClient.Exceptions;
 using tiv.elasticClient.ExtensionFunctions;
+using tiv.elasticClient.APIs._mapping;
+using tiv.elasticClient.APIs._settings;
+using System.Threading.Tasks;
+using tiv.elasticClient.APIs._cat.Models;
 
 namespace indexify
 {
@@ -31,11 +35,13 @@ namespace indexify
 
         public static void Execute(CommandLineModel cmdLineModel)
         {
+            long elaspsedTotalTime = 0;
+
             try
             {
                 SetupClassProperties(cmdLineModel);
 
-                ProcessIndexes();
+                elaspsedTotalTime = ProcessIndexes();
             }
             catch (RestCallException ex)
             {
@@ -62,7 +68,7 @@ namespace indexify
             {
                 
             }
-            VerboseLogLine("Operation Complete.");
+            VerboseLogLine($"Operation Completed in {elaspsedTotalTime}ms.");
         }
 
         private static void SetupClassProperties(CommandLineModel cmdLineModel)
@@ -183,15 +189,10 @@ namespace indexify
             }
         }
 
-        private static void ProcessIndexes()
+        private static long ProcessIndexes()
         {
             var client = RestClientUtility.Instance.NewClient(_commandLineModel.Url, _IAuth);
-
             var catApi = new CatAPI();
-            var reindexApi = new ReindexAPI();
-            var indexApi = new IndexAPI();
-            var searchAndScrollApi = new SearchAndScrollAPI();
-            var bulkApi = new BulkAPI();
 
             var indexes = catApi.Get(client, _commandLineModel.SourceIndexPattern, out _currentResourceCall);
             indexes = indexes.OrderBy(m => m.index).ToList();
@@ -201,184 +202,223 @@ namespace indexify
                 VerboseLogLine($"Call to '{_currentResourceCall} returned {indexes.Count} indexes.");
             }
 
-            var sw = new Stopwatch();
+            var totalSw = new Stopwatch();
+            totalSw.Start();
 
-            foreach (var index in indexes)
+            Parallel.ForEach(indexes, new ParallelOptions() { MaxDegreeOfParallelism = _commandLineModel.MaxParallelism } , index =>
             {
-                string verb;
+                ReIndex(index);
+            });
 
-                if (_commandLineModel.NoDestinationJustDelete)
+            totalSw.Stop();
+            return totalSw.ElapsedMilliseconds;
+        }
+
+        private static void ReIndex(CatResponse index)
+        {
+            var client = RestClientUtility.Instance.NewClient(_commandLineModel.Url, _IAuth);
+
+            var catApi = new CatAPI();
+            var mappingApi = new MappingAPI();
+            var settingsApi = new SettingsAPI();
+            var reindexApi = new ReindexAPI();
+            var indexApi = new IndexAPI();
+            var searchAndScrollApi = new SearchAndScrollAPI();
+            var bulkApi = new BulkAPI();
+
+            var indexSw = new Stopwatch();
+
+            string verb;
+
+            if (_commandLineModel.NoDestinationJustDelete)
+            {
+                verb = _commandLineModel.DryRun ? "Deleting DryRun" : "Deleting";
+            }
+            else
+            {
+                verb = _commandLineModel.DryRun ? "Reindexing DryRun" : "Reindexing";
+            }
+
+            var rir = new ReindexRequest
+            {
+                conflicts = "proceed",
+                source = new ReindexSource()
                 {
-                    verb = _commandLineModel.DryRun ? "Deleting DryRun" : "Deleting";
+                    index = index.index
+                },
+                dest = new ReindexDestination()
+                {
+                    index = BuildDestinationIndex(index.index),
+                    op_type = "create"
+                }
+            };
+
+            var reindexResultModel = new ReindexResultModel()
+            {
+                IndexSource = rir.source.index,
+                IndexDestination = rir.dest.index
+            };
+
+            try
+            {
+                var skipIndex = false;
+
+                if (!index.health.CompareNoCase("green") && !index.health.CompareNoCase("yellow"))
+                {
+                    reindexResultModel.ReindexSkipped = true;
+                    reindexResultModel.SkippedReason = $"Index health '{index.health}'.";
+                    skipIndex = true;
+                }
+                else if (!index.status.CompareNoCase("open"))
+                {
+                    reindexResultModel.ReindexSkipped = true;
+                    reindexResultModel.SkippedReason = $"Index status '{index.health}'.";
+                    skipIndex = true;
+                }
+                else if (index.docscount == 0)
+                {
+                    reindexResultModel.ReindexSkipped = true;
+                    reindexResultModel.SkippedReason = "No documents in index.";
+                    skipIndex = true;
+                }
+
+                if (skipIndex)
+                {
+                    if (_commandLineModel.DryRun || _commandLineModel.Verbose)
+                    {
+                        VerboseLogLine($"{verb} ({index.docscount} Docs):");
+                        VerboseLogLine($"   {index.index} ! SKIPPED ({reindexResultModel.SkippedReason})");
+                    }
                 }
                 else
                 {
-                    verb = _commandLineModel.DryRun ? "Reindexing DryRun" : "Reindexing";
-                }
-
-                var rir = new ReindexRequest
-                {
-                    conflicts = "proceed",
-                    source = new ReindexSource()
+                    if (_commandLineModel.DryRun || _commandLineModel.Verbose)
                     {
-                        index = index.index
-                    },
-                    dest = new ReindexDestination()
-                    {
-                        index = BuildDestinationIndex(index.index),
-                        op_type = "create"
-                    }
-                };
-
-                var reindexResultModel = new ReindexResultModel()
-                {
-                    IndexSource = rir.source.index,
-                    IndexDestination = rir.dest.index
-                };
-                
-                try
-                {
-                    var skipIndex = false;
-
-                    if (!index.health.CompareNoCase("green") && !index.health.CompareNoCase("yellow"))
-                    {
-                        reindexResultModel.ReindexSkipped = true;
-                        reindexResultModel.SkippedReason = $"Index health '{index.health}'.";
-                        skipIndex = true;
-                    }
-                    else if (!index.status.CompareNoCase("open"))
-                    {
-                        reindexResultModel.ReindexSkipped = true;
-                        reindexResultModel.SkippedReason = $"Index status '{index.health}'.";
-                        skipIndex = true;
-                    }
-                    else if (index.docscount == 0)
-                    {
-                        reindexResultModel.ReindexSkipped = true;
-                        reindexResultModel.SkippedReason = "No documents in index.";
-                        skipIndex = true;
+                        VerboseLogLine($"{verb} ({index.docscount} Docs):");
+                        VerboseLogLine($"   {index.index} ==> {rir.dest.index}");
                     }
 
-                    if (skipIndex)
+                    if (!_commandLineModel.DryRun)
                     {
-                        if (_commandLineModel.DryRun || _commandLineModel.Verbose)
+                        lock (_results)
                         {
-                            VerboseLogLine($"{verb} ({index.docscount} Docs):");
-                            VerboseLogLine($"   {index.index} ! SKIPPED ({reindexResultModel.SkippedReason})");
-                        }
-                    }
-                    else
-                    {
-                        if (_commandLineModel.DryRun || _commandLineModel.Verbose)
-                        {
-                            VerboseLogLine($"{verb} ({index.docscount} Docs):");
-                            VerboseLogLine($"   {index.index} ==> {rir.dest.index}");
-                        }
-
-                        if (!_commandLineModel.DryRun)
-                        {
-                            // Can we use reindex API or do we need to scroll?
-                            if (_commandLineModel.ScrollCount == 0 || _commandLineModel.ScrollCount >= index.docscount | _commandLineModel.NoDestinationJustDelete)
+                            // Check whether index already exists
+                            if (_commandLineModel.CopySourceIndexMappingsAndSettings && !catApi.IndexExists(client, rir.dest.index))
                             {
-                                reindexResultModel.DocsInOldIndex = index.docscount;
-                                sw.Restart();
-                                if (_commandLineModel.NoDestinationJustDelete)
-                                {
-                                    reindexResultModel.DocsDeleted = index.docscount;
-                                    var dir = indexApi.Delete(client, rir.source.index, out _currentResourceCall);
-                                    reindexResultModel.DeleteAcknowledged = dir.acknowledged;
-                                }
-                                else
-                                {
-                                    var reindexResponse = reindexApi.Post(client, rir, out _currentResourceCall);
-                                    reindexResultModel.DocsCreated = reindexResponse.created;
-                                    reindexResultModel.DocsUpdated = reindexResponse.updated;
-                                    reindexResultModel.DocsVersionConflicts = reindexResponse.version_conflicts;
 
-                                    if (reindexResponse.created + reindexResponse.updated +
-                                        reindexResponse.version_conflicts != index.docscount)
-                                    {
-                                        reindexResultModel.DeleteIndexSkipped = true;
-                                        VerboseLogLine($"WARNING: Skipped call delete index '{index.index}' as reindex document count does not match source count (DestCreated {reindexResponse.created} + DestUpdated {reindexResponse.updated} + DestVerConflict {reindexResponse.version_conflicts} != Src {index.docscount})");
-                                    }
-                                    else if (!_commandLineModel.CopyOnly)
-                                    {
-                                        var dir = indexApi.Delete(client, rir.source.index, out _currentResourceCall);
-                                        reindexResultModel.DeleteAcknowledged = dir.acknowledged;
-                                    }
-                                }
-
-                                sw.Stop();
-                                reindexResultModel.ActionTime = sw.ElapsedMilliseconds;
+                                // We need to create the destination index first with mapping + settings
+                                var mappings = mappingApi.Get(client, index.index, out _currentResourceCall);
+                                var settings = settingsApi.Get(client, index.index, out _currentResourceCall, shards: _commandLineModel.Shards, replicas: _commandLineModel.Replicas);
+                                indexApi.Create(client, rir.dest.index, settings, mappings, out _currentResourceCall);
                             }
-                            // We need to scroll rather than reindex.
+                        }
+
+                        // Can we use reindex API or do we need to scroll?
+                        if (_commandLineModel.ScrollCount == 0 || _commandLineModel.ScrollCount >= index.docscount | _commandLineModel.NoDestinationJustDelete)
+                        {
+                            reindexResultModel.DocsInOldIndex = index.docscount;
+                            indexSw.Restart();
+                            if (_commandLineModel.NoDestinationJustDelete)
+                            {
+                                reindexResultModel.DocsDeleted = index.docscount;
+                                var dir = indexApi.Delete(client, rir.source.index, out _currentResourceCall);
+                                reindexResultModel.DeleteAcknowledged = dir.acknowledged;
+                            }
                             else
                             {
-                                reindexResultModel.DocsInOldIndex = index.docscount;
-                                sw.Restart();
+                                var reindexResponse = reindexApi.Post(client, rir, out _currentResourceCall);
+                                reindexResultModel.DocsCreated = reindexResponse.created;
+                                reindexResultModel.DocsUpdated = reindexResponse.updated;
+                                reindexResultModel.DocsVersionConflicts = reindexResponse.version_conflicts;
 
-                                var sasRequest = new SearchAndScrollRequest()
-                                {
-                                    size = _commandLineModel.ScrollCount,
-                                    query = new MatchAllQuery()
-                                };
-                                var searchAndScrollResponse = searchAndScrollApi.PostSearch(client, sasRequest, rir.source.index, "5m", out _currentResourceCall);
-
-                                while (searchAndScrollResponse.hits.hits.Count > 0)
-                                {
-                                    var bulkRequestBuilder = new StringBuilder();
-                                    foreach (var hit in searchAndScrollResponse.hits.hits)
-                                    {
-                                        bulkRequestBuilder.AddHitToBulkOperation(IndexDocumentActionType.Create, hit._source, rir.dest.index, hit._type, hit._id);
-                                        if (!_commandLineModel.CopyOnly)
-                                        {
-                                            bulkRequestBuilder.AddHitToBulkOperation(IndexDocumentActionType.Delete, hit._source, hit._index, hit._type, hit._id);
-                                        }
-                                    }
-                                    var bulkRequestBody = bulkRequestBuilder.ToString();
-                                    var bulkResponse = bulkApi.Post(client, bulkRequestBody, out _currentResourceCall);
-                                    if (bulkResponse.errors == true) reindexResultModel.ExceptionEncountered = true;
-
-                                    reindexResultModel.DocsCreated += bulkResponse.items.Where(m => m.create != null && (m.create.status == 201)).ToList().Count;
-                                    searchAndScrollResponse = searchAndScrollApi.PostScroll(client, "5m", searchAndScrollResponse.scroll_id, out _currentResourceCall);
-                                }
-
-
-                                if (reindexResultModel.DocsCreated != reindexResultModel.DocsInOldIndex)
+                                if (reindexResponse.created + reindexResponse.updated +
+                                    reindexResponse.version_conflicts != index.docscount)
                                 {
                                     reindexResultModel.DeleteIndexSkipped = true;
-                                    VerboseLogLine($"WARNING: Skipped call delete index '{index.index}' as document copy count does not match source count (DestCreated {reindexResultModel.DocsCreated} != Src {index.docscount})");
+                                    VerboseLogLine($"WARNING: Skipped call delete index '{index.index}' as reindex document count does not match source count (DestCreated {reindexResponse.created} + DestUpdated {reindexResponse.updated} + DestVerConflict {reindexResponse.version_conflicts} != Src {index.docscount})");
                                 }
                                 else if (!_commandLineModel.CopyOnly)
                                 {
                                     var dir = indexApi.Delete(client, rir.source.index, out _currentResourceCall);
                                     reindexResultModel.DeleteAcknowledged = dir.acknowledged;
                                 }
-
-                                sw.Stop();
-                                reindexResultModel.ActionTime = sw.ElapsedMilliseconds;
                             }
+
+                            indexSw.Stop();
+                            reindexResultModel.ActionTime = indexSw.ElapsedMilliseconds;
                         }
+                        // We need to scroll rather than reindex.
                         else
                         {
-                            reindexResultModel.ReindexSkipped = true;
-                            reindexResultModel.SkippedReason = "DryRun is true";
+                            reindexResultModel.DocsInOldIndex = index.docscount;
+                            indexSw.Restart();
+
+                            var sasRequest = new SearchAndScrollRequest()
+                            {
+                                size = _commandLineModel.ScrollCount,
+                                query = new MatchAllQuery()
+                            };
+                            var searchAndScrollResponse = searchAndScrollApi.PostSearch(client, sasRequest, rir.source.index, "5m", out _currentResourceCall);
+
+                            while (searchAndScrollResponse.hits.hits.Count > 0)
+                            {
+                                var bulkRequestBuilder = new StringBuilder();
+                                foreach (var hit in searchAndScrollResponse.hits.hits)
+                                {
+                                    bulkRequestBuilder.AddHitToBulkOperation(IndexDocumentActionType.Create, hit._source, rir.dest.index, hit._type, hit._id);
+                                    if (!_commandLineModel.CopyOnly)
+                                    {
+                                        bulkRequestBuilder.AddHitToBulkOperation(IndexDocumentActionType.Delete, hit._source, hit._index, hit._type, hit._id);
+                                    }
+                                }
+                                var bulkRequestBody = bulkRequestBuilder.ToString();
+                                var bulkResponse = bulkApi.Post(client, bulkRequestBody, out _currentResourceCall);
+                                if (bulkResponse.errors == true) reindexResultModel.ExceptionEncountered = true;
+
+                                reindexResultModel.DocsCreated += bulkResponse.items.Where(m => m.create != null && (m.create.status == 201)).ToList().Count;
+                                searchAndScrollResponse = searchAndScrollApi.PostScroll(client, "5m", searchAndScrollResponse.scroll_id, out _currentResourceCall);
+                            }
+
+
+                            if (reindexResultModel.DocsCreated != reindexResultModel.DocsInOldIndex)
+                            {
+                                reindexResultModel.DeleteIndexSkipped = true;
+                                VerboseLogLine($"WARNING: Skipped call delete index '{index.index}' as document copy count does not match source count (DestCreated {reindexResultModel.DocsCreated} != Src {index.docscount})");
+                            }
+                            else if (!_commandLineModel.CopyOnly)
+                            {
+                                var dir = indexApi.Delete(client, rir.source.index, out _currentResourceCall);
+                                reindexResultModel.DeleteAcknowledged = dir.acknowledged;
+                            }
+
+                            indexSw.Stop();
+                            reindexResultModel.ActionTime = indexSw.ElapsedMilliseconds;
+                            VerboseLogLine($"   {index.index} ==> {rir.dest.index} finished in {indexSw.ElapsedMilliseconds}ms");
                         }
                     }
-                }
-                catch (RestCallException rex)
-                {
-                    VerboseLogLine($"ERROR: RESTFul Call Failed calling '{_currentResourceCall}'");
-                    VerboseLogLine($"Http Status Code: {rex.StatusCode}");
-                    VerboseLogLine($"Http Status Description: {rex.StatusDescription}");
-                    if (rex.InnerException != null)
+                    else
                     {
-                        VerboseLogLine($"Exception: {rex.InnerException.Message}");
+                        reindexResultModel.ReindexSkipped = true;
+                        reindexResultModel.SkippedReason = "DryRun is true";
                     }
-                    VerboseLogLine("");
-                    reindexResultModel.ExceptionEncountered = true;
-                    reindexResultModel.ExceptionInfo = $"'{_currentResourceCall}' Call Failed, Status Code: {rex.StatusCode}, Status Description: {rex.StatusDescription}";
                 }
+            }
+            catch (RestCallException rex)
+            {
+                VerboseLogLine($"ERROR: RESTFul Call Failed calling '{_currentResourceCall}'");
+                VerboseLogLine($"Http Status Code: {rex.StatusCode}");
+                VerboseLogLine($"Http Status Description: {rex.StatusDescription}");
+                if (rex.InnerException != null)
+                {
+                    VerboseLogLine($"Exception: {rex.InnerException.Message}");
+                }
+                VerboseLogLine("");
+                reindexResultModel.ExceptionEncountered = true;
+                reindexResultModel.ExceptionInfo = $"'{_currentResourceCall}' Call Failed, Status Code: {rex.StatusCode}, Status Description: {rex.StatusDescription}";
+            }
+
+            lock (_results)
+            {
                 _results.Add(reindexResultModel);
             }
         }

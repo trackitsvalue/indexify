@@ -34,6 +34,7 @@ namespace indexify
 
                 Console.WriteLine("");
                 indexify.Execute(cmdLineModel);
+                Console.Read();
             }
         }
     }

@@ -14,6 +14,7 @@ namespace tiv.elasticClient.APIs._reindex
 
             var request = new RestRequest(resource, Method.POST) { RequestFormat = DataFormat.Json };
             request.AddHeader("Accept", "application/json");
+            request.AddQueryParameter("slices", "auto");
             request.AddJsonBody(reindexRequest);
 
             var response = client.Execute<ReindexResponse>(request);
