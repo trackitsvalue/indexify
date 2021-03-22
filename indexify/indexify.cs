@@ -23,15 +23,18 @@ using tiv.elasticClient.APIs._mapping;
 using tiv.elasticClient.APIs._settings;
 using System.Threading.Tasks;
 using tiv.elasticClient.APIs._cat.Models;
+using System.Collections.Concurrent;
 
 namespace indexify
 {
     static class indexify
     {
-        private static List<ReindexResultModel> _results = new List<ReindexResultModel>();
+        private static ConcurrentBag<ReindexResultModel> _results = new ConcurrentBag<ReindexResultModel>();
         private static string _currentResourceCall = string.Empty;
         private static IAuthenticator _IAuth;
         private static CommandLineModel _commandLineModel;
+        private static ConcurrentDictionary<string, bool> _indexExists = new ConcurrentDictionary<string, bool>();
+        private static object _semaphore = new object();
 
         public static void Execute(CommandLineModel cmdLineModel)
         {
@@ -300,16 +303,21 @@ namespace indexify
 
                     if (!_commandLineModel.DryRun)
                     {
-                        lock (_results)
+                        // Check whether index already exists
+                        if (_commandLineModel.CopySourceIndexMappingsAndSettings)
                         {
-                            // Check whether index already exists
-                            if (_commandLineModel.CopySourceIndexMappingsAndSettings && !catApi.IndexExists(client, rir.dest.index))
+                            lock (_semaphore)
                             {
+                                if (!_indexExists.ContainsKey(rir.dest.index) && !catApi.IndexExists(client, rir.dest.index))
+                                {
+                                    // We need to create the destination index first with mapping + settings
+                                    var mappings = mappingApi.Get(client, index.index, out _currentResourceCall);
+                                    var settings = settingsApi.Get(client, index.index, out _currentResourceCall, shards: _commandLineModel.Shards, replicas: _commandLineModel.Replicas);
+                                    indexApi.Create(client, rir.dest.index, settings, mappings, out _currentResourceCall);
 
-                                // We need to create the destination index first with mapping + settings
-                                var mappings = mappingApi.Get(client, index.index, out _currentResourceCall);
-                                var settings = settingsApi.Get(client, index.index, out _currentResourceCall, shards: _commandLineModel.Shards, replicas: _commandLineModel.Replicas);
-                                indexApi.Create(client, rir.dest.index, settings, mappings, out _currentResourceCall);
+                                    // Mark as exists
+                                    _indexExists.AddOrUpdate(rir.dest.index, true, (key, oldValue) => { return true; });
+                                }
                             }
                         }
 
@@ -417,10 +425,7 @@ namespace indexify
                 reindexResultModel.ExceptionInfo = $"'{_currentResourceCall}' Call Failed, Status Code: {rex.StatusCode}, Status Description: {rex.StatusDescription}";
             }
 
-            lock (_results)
-            {
-                _results.Add(reindexResultModel);
-            }
+            _results.Add(reindexResultModel);
         }
 
         private static string BuildDestinationIndex(string sourceIndex)
