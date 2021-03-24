@@ -278,7 +278,7 @@ namespace indexify
                     reindexResultModel.SkippedReason = $"Index status '{index.health}'.";
                     skipIndex = true;
                 }
-                else if (index.docscount == 0)
+                else if (index.docscount == 0 && !_commandLineModel.NoDestinationJustDelete)
                 {
                     reindexResultModel.ReindexSkipped = true;
                     reindexResultModel.SkippedReason = "No documents in index.";
