@@ -1,0 +1,68 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="BuildTestAndPublish;PublishReleaseStatistics">
+	<Import Project="$(MSBUILD_CUSTOM_HOME)\DefineTasks.targets" />
+  <PropertyGroup>
+    <SolutionDirectory>$(WORKSPACE)</SolutionDirectory>
+    <SolutionFile>$(SolutionDirectory)\indexify.sln</SolutionFile>
+    <ApplicationName>tiv.elasticClient</ApplicationName>
+    <ApplicationName2>Indexify</ApplicationName2>
+    <IncludeBinariesInSourceZip>false</IncludeBinariesInSourceZip>
+    <MainlineVersionOverride>16.0</MainlineVersionOverride>
+  </PropertyGroup>
+  <Target Name="BuildTestAndPublish">
+    <CallTarget Targets="MsgAppBuildStart" />
+    <CallTarget Targets="ShowGitInfo" />
+    
+	  <Exec Command="nuget.exe restore &quot;$(SolutionFile)&quot;" WorkingDirectory="$(SolutionDirectory)\.build" />
+    <!-- 
+      MAJOR.MINOR VERSION OVERRIDE NOTE: 
+      
+      If you want to deviate from mainline version on Jenkins Server, you can override with MainlineVersionOverride defined above, otherwise
+      use the environment variable CURRENT_MAINLINE_VERSION instead.
+    -->
+    <DefineAppVersion BuildNumber="$(BUILD_NUMBER)" MainlineVersion="$(CURRENT_MAINLINE_VERSION)" GitBranch="$(GIT_BRANCH)" Verbose="$(VERBOSE)" >
+      <Output TaskParameter="ApplicationVersion" PropertyName="ApplicationVersion" />
+      <Output TaskParameter="ShortApplicationVersion" PropertyName="ShortApplicationVersion" />
+    </DefineAppVersion>
+    <!--<Exec Command="CopyLibs_Release.bat &quot;$(BASE_REPO_HOME)&quot;" WorkingDirectory="$(SolutionDirectory)" />-->
+    <SetVersionInfoFile SolutionType="cs" SolutionDirectory="$(SolutionDirectory)" AssemblySubdirectory="tiv.elasticClient" Company="$(COMPANY)" ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" Verbose="$(VERBOSE)" />
+    
+    <SetVersionInfoFile SolutionType="cs" SolutionDirectory="$(SolutionDirectory)" AssemblySubdirectory="indexify" Company="$(COMPANY)" ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" Verbose="$(VERBOSE)" />
+
+    <!-- Build Debug version, run all unit tests, if successful publish both apps to the repository. --> 
+    <MSBuild Projects="$(SolutionFile)" Properties="Configuration=Debug;Platform=Any CPU" Targets="Clean;Build" />
+    <!--<NUnit Assemblies="$(SolutionDirectory)\Tests\bin\Debug\NLog.Targets.NetworkJSON.Tests.dll" ToolPath="$(NUNIT_HOME)" />-->
+    
+	  <!-- Push applications -->
+	  <PushToRepository ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Debug" SourceDirectoryOrFile="$(SolutionDirectory)\tiv.elasticClient\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
+    
+    <PushToRepository ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Debug" SourceDirectoryOrFile="$(SolutionDirectory)\indexify\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)">
+      <Output TaskParameter="RepositoryInfo" ItemName="RepositoryInfo" />
+    </PushToRepository>
+
+    <!-- Build Release version and publish to the repository. --> 
+    <MSBuild Projects="$(SolutionFile)" Properties="Configuration=Release;Platform=Any CPU" Targets="Clean;Build" />
+  
+    <PushToRepository ApplicationName="$(ApplicationName)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Release" SourceDirectoryOrFile="$(SolutionDirectory)\tiv.elasticClient\bin\Release" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
+    
+    <PushToRepository ApplicationName="$(ApplicationName2)" ApplicationVersion="$(ApplicationVersion)" PushToDirectory="Release" SourceDirectoryOrFile="$(SolutionDirectory)\indexify\bin\Debug" BaseRepositoryLocation="$(BASE_REPO_HOME)" Verbose="$(VERBOSE)" />
+    
+    <!-- Public tiv.elasticClient to nuget for wider consumption -->
+    <Exec Command="nuget pack tiv.elasticClient.csproj -Prop Configuration=Release" WorkingDirectory="$(SolutionDirectory)\tiv.elasticClient" />
+    <Exec Command="nuget push tiv.elasticClient.$(ShortApplicationVersion).nupkg -Source https://api.nuget.org/v3/index.json" WorkingDirectory="$(SolutionDirectory)\tiv.elasticClient" />
+  
+    <OnError ExecuteTargets="InformUsersOnError" />
+  </Target>
+  
+  <Import Project="$(MSBUILD_CUSTOM_HOME)\PublishRelease.targets" />
+
+  <Target Name="PublishReleaseStatistics">
+    <CallTarget Targets="CreateGitInfoFile" />
+    <CallTarget Targets="ZipAndPublishSource" />
+    <CallTarget Targets="PublishApplicationInfo" />
+    <CallTarget Targets="MsgAppBuildComplete" />
+  </Target>
+    
+  <Target Name="InformUsersOnError">
+    <CallTarget Targets="MsgAppBuildFailed" />
+  </Target>
+</Project>

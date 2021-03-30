@@ -6,19 +6,19 @@ using System.Linq;
 using System.Text;
 using indexify.Models;
 using RestSharp.Authenticators;
-using tiv.elastic;
-using tiv.elastic.APIs.Index;
-using tiv.elastic.APIs.Index.Enums;
-using tiv.elastic.APIs._bulk;
-using tiv.elastic.APIs._bulk.ExtensionMethods;
-using tiv.elastic.APIs._cat;
-using tiv.elastic.APIs._reindex;
-using tiv.elastic.APIs._reindex.Models;
-using tiv.elastic.APIs._search;
-using tiv.elastic.APIs._search.Models;
-using tiv.elastic.APIs._search.Models.QueryDLS;
-using tiv.elastic.Exceptions;
-using tiv.elastic.ExtensionFunctions;
+using tiv.elasticClient;
+using tiv.elasticClient.APIs.Index;
+using tiv.elasticClient.APIs.Index.Enums;
+using tiv.elasticClient.APIs._bulk;
+using tiv.elasticClient.APIs._bulk.ExtensionMethods;
+using tiv.elasticClient.APIs._cat;
+using tiv.elasticClient.APIs._reindex;
+using tiv.elasticClient.APIs._reindex.Models;
+using tiv.elasticClient.APIs._search;
+using tiv.elasticClient.APIs._search.Models;
+using tiv.elasticClient.APIs._search.Models.QueryDLS;
+using tiv.elasticClient.Exceptions;
+using tiv.elasticClient.ExtensionFunctions;
 
 namespace indexify
 {
@@ -37,7 +37,7 @@ namespace indexify
 
                 ProcessIndexes();
             }
-            catch (RESTCallException ex)
+            catch (RestCallException ex)
             {
                 VerboseLogLine($"ERROR: RESTFul Call Failed calling '{_currentResourceCall}'\n");
                 VerboseLogLine($"Http Status Code: {ex.StatusCode}\n");
@@ -185,7 +185,7 @@ namespace indexify
 
         private static void ProcessIndexes()
         {
-            var client = RESTClientUtility.Instance.NewClient(_commandLineModel.Url, _IAuth);
+            var client = RestClientUtility.Instance.NewClient(_commandLineModel.Url, _IAuth);
 
             var catApi = new CatAPI();
             var reindexApi = new ReindexAPI();
@@ -366,7 +366,7 @@ namespace indexify
                         }
                     }
                 }
-                catch (RESTCallException rex)
+                catch (RestCallException rex)
                 {
                     VerboseLogLine($"ERROR: RESTFul Call Failed calling '{_currentResourceCall}'");
                     VerboseLogLine($"Http Status Code: {rex.StatusCode}");

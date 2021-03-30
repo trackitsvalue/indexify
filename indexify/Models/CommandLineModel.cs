@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using tiv.elastic.ExtensionFunctions;
+using tiv.elasticClient.ExtensionFunctions;
 
 namespace indexify.Models
 {
